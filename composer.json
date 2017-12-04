@@ -1,0 +1,29 @@
+{
+    "name": "darkwebdesign/doctrine-unit-testing",
+    "type": "library",
+    "description": "Doctrine Unit Testing",
+    "keywords": ["doctrine", "unit", "testing"],
+    "homepage": "http://www.darkwebdesign.nl/",
+    "license": "MIT",
+    "authors": [
+        {"name": "Raymond Schouten"}
+    ],
+    "require": {
+        "doctrine/orm": "2.4.0",
+        "php": ">=5.3.2"
+    },
+    "require-dev": {
+        "codeclimate/php-test-reporter": "^0.3.2",
+        "phpunit/phpunit": "^4.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "DarkWebDesign\\DoctrineUnitTesting\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DarkWebDesign\\DoctrineUnitTesting\\": "tests/"
+        }
+    }
+}
