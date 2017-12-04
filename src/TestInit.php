@@ -20,6 +20,6 @@ if ( ! file_exists(__DIR__ . '/Proxies') && ! mkdir(__DIR__ . '/Proxies')) {
     throw new \Exception("Could not create " . __DIR__."/Proxies Folder.");
 }
 
-if ( ! file_exists(__DIR__ . '/ORM/Proxy/generated') &&  ! mkdir(__DIR__ . '/ORM/Proxy/generated')) {
+if ( ! file_exists(__DIR__ . '/ORM/Proxy/generated') &&  ! mkdir(__DIR__ . '/ORM/Proxy/generated', 0777, true)) {
     throw new \Exception('Could not create ' . __DIR__ . '/ORM/Proxy/generated Folder.');
 }
