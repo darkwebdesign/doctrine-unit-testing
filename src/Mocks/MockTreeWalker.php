@@ -2,10 +2,12 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
+use Doctrine\ORM\Query\TreeWalkerAdapter;
+
 /**
  * Mock class for TreeWalker.
  */
-class MockTreeWalker extends \Doctrine\ORM\Query\TreeWalkerAdapter
+class MockTreeWalker extends TreeWalkerAdapter
 {
     /**
      * {@inheritdoc}

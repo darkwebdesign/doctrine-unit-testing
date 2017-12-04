@@ -2,8 +2,6 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Models\Legacy;
 
-use Doctrine\Common\Collections\ArrayCollection;
-
 /**
  * @Entity
  * @Table(name="legacy_cars")

@@ -1,14 +1,13 @@
 <?php
 
-namespace DarkWebDesign\DoctrineUnitTesting\Models\Quote;
+namespace DarkWebDesign\DoctrineUnitTesting\Models\Generic;
 
 /**
  * @Entity
- * @Table(name="`ddc-1719-simple-entity`")
+ * @Table(name="`not-a-simple-entity`")
  */
-class SimpleEntity
+class NonAlphaColumnsEntity
 {
-
     /**
      * @Id
      * @Column(type="integer", name="`simple-entity-id`")
@@ -28,5 +27,4 @@ class SimpleEntity
     {
         $this->value = $value;
     }
-
 }

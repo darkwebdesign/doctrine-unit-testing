@@ -2,25 +2,29 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Persisters\Entity\BasicEntityPersister;
+
 /**
  * EntityPersister implementation used for mocking during tests.
  */
-class EntityPersisterMock extends \Doctrine\ORM\Persisters\BasicEntityPersister
+class EntityPersisterMock extends BasicEntityPersister
 {
     /**
      * @var array
      */
-    private $inserts = array();
+    private $inserts = [];
 
     /**
      * @var array
      */
-    private $updates = array();
+    private $updates = [];
 
     /**
      * @var array
      */
-    private $deletes = array();
+    private $deletes = [];
 
     /**
      * @var int
@@ -35,7 +39,7 @@ class EntityPersisterMock extends \Doctrine\ORM\Persisters\BasicEntityPersister
     /**
      * @var array
      */
-    private $postInsertIds = array();
+    private $postInsertIds = [];
 
     /**
      * @var bool
@@ -50,10 +54,13 @@ class EntityPersisterMock extends \Doctrine\ORM\Persisters\BasicEntityPersister
     public function addInsert($entity)
     {
         $this->inserts[] = $entity;
-        if ( ! is_null($this->mockIdGeneratorType) && $this->mockIdGeneratorType == \Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_IDENTITY
+        if ( ! is_null($this->mockIdGeneratorType) && $this->mockIdGeneratorType == ClassMetadata::GENERATOR_TYPE_IDENTITY
                 || $this->class->isIdGeneratorIdentity()) {
             $id = $this->identityColumnValueCounter++;
-            $this->postInsertIds[$id] = $entity;
+            $this->postInsertIds[] = [
+                'generatedId' => $id,
+                'entity' => $entity,
+            ];
             return $id;
         }
         return null;
@@ -88,7 +95,7 @@ class EntityPersisterMock extends \Doctrine\ORM\Persisters\BasicEntityPersister
     /**
      * {@inheritdoc}
      */
-    public function exists($entity, array $extraConditions = array())
+    public function exists($entity, Criteria $extraConditions = null)
     {
         $this->existsCalled = true;
     }
@@ -132,9 +139,9 @@ class EntityPersisterMock extends \Doctrine\ORM\Persisters\BasicEntityPersister
     {
         $this->existsCalled = false;
         $this->identityColumnValueCounter = 0;
-        $this->inserts = array();
-        $this->updates = array();
-        $this->deletes = array();
+        $this->inserts = [];
+        $this->updates = [];
+        $this->deletes = [];
     }
 
     /**

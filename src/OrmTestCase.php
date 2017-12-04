@@ -2,7 +2,15 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting;
 
+use Doctrine\Common\Annotations;
 use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\Version;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\ORM\Cache\CacheConfiguration;
+use Doctrine\ORM\Cache\DefaultCacheFactory;
+use Doctrine\ORM\Configuration;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
+use DarkWebDesign\DoctrineUnitTesting\Mocks;
 
 /**
  * Base testcase class for all ORM testcases.
@@ -24,47 +32,73 @@ abstract class OrmTestCase extends DoctrineTestCase
     private static $_queryCacheImpl = null;
 
     /**
+     * @var bool
+     */
+    protected $isSecondLevelCacheEnabled = false;
+
+    /**
+     * @var bool
+     */
+    protected $isSecondLevelCacheLogEnabled = false;
+
+    /**
+     * @var \Doctrine\ORM\Cache\CacheFactory
+     */
+    protected $secondLevelCacheFactory;
+
+    /**
+     * @var \Doctrine\ORM\Cache\Logging\StatisticsCacheLogger
+     */
+    protected $secondLevelCacheLogger;
+
+    /**
+     * @var \Doctrine\Common\Cache\Cache|null
+     */
+    protected $secondLevelCacheDriverImpl = null;
+
+    /**
      * @param array $paths
      * @param mixed $alias
      *
      * @return \Doctrine\ORM\Mapping\Driver\AnnotationDriver
      */
-    protected function createAnnotationDriver($paths = array(), $alias = null)
+    protected function createAnnotationDriver($paths = [], $alias = null)
     {
-        if (version_compare(\Doctrine\Common\Version::VERSION, '3.0.0', '>=')) {
-            $reader = new \Doctrine\Common\Annotations\CachedReader(
-                new \Doctrine\Common\Annotations\AnnotationReader(), new ArrayCache()
-            );
-        }
-        else if (version_compare(\Doctrine\Common\Version::VERSION, '2.2.0-DEV', '>=')) {
+        if (version_compare(Version::VERSION, '3.0.0', '>=')) {
+            $reader = new Annotations\CachedReader(new Annotations\AnnotationReader(), new ArrayCache());
+        } else if (version_compare(Version::VERSION, '2.2.0-DEV', '>=')) {
             // Register the ORM Annotations in the AnnotationRegistry
-            $reader = new \Doctrine\Common\Annotations\SimpleAnnotationReader();
+            $reader = new Annotations\SimpleAnnotationReader();
+
             $reader->addNamespace('Doctrine\ORM\Mapping');
-            $reader = new \Doctrine\Common\Annotations\CachedReader($reader, new ArrayCache());
-        }
-        else if (version_compare(\Doctrine\Common\Version::VERSION, '2.1.0-BETA3-DEV', '>=')) {
-            $reader = new \Doctrine\Common\Annotations\AnnotationReader();
+
+            $reader = new Annotations\CachedReader($reader, new ArrayCache());
+        } else if (version_compare(Version::VERSION, '2.1.0-BETA3-DEV', '>=')) {
+            $reader = new Annotations\AnnotationReader();
+
             $reader->setIgnoreNotImportedAnnotations(true);
             $reader->setEnableParsePhpImports(false);
+
             if ($alias) {
                 $reader->setAnnotationNamespaceAlias('Doctrine\ORM\Mapping\\', $alias);
             } else {
                 $reader->setDefaultAnnotationNamespace('Doctrine\ORM\Mapping\\');
             }
-            $reader = new \Doctrine\Common\Annotations\CachedReader(
-                new \Doctrine\Common\Annotations\IndexedReader($reader), new ArrayCache()
-            );
+
+            $reader = new Annotations\CachedReader(new Annotations\IndexedReader($reader), new ArrayCache());
         } else {
-            $reader = new \Doctrine\Common\Annotations\AnnotationReader();
+            $reader = new Annotations\AnnotationReader();
+
             if ($alias) {
                 $reader->setAnnotationNamespaceAlias('Doctrine\ORM\Mapping\\', $alias);
             } else {
                 $reader->setDefaultAnnotationNamespace('Doctrine\ORM\Mapping\\');
             }
         }
-        \Doctrine\Common\Annotations\AnnotationRegistry::registerFile(
-            __DIR__ . "/../../../lib/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php");
-        return new \Doctrine\ORM\Mapping\Driver\AnnotationDriver($reader, (array)$paths);
+
+        Annotations\AnnotationRegistry::registerFile(__DIR__ . "/../../../lib/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php");
+
+        return new AnnotationDriver($reader, (array) $paths);
     }
 
     /**
@@ -86,30 +120,53 @@ abstract class OrmTestCase extends DoctrineTestCase
     {
         $metadataCache = $withSharedMetadata
             ? self::getSharedMetadataCacheImpl()
-            : new \Doctrine\Common\Cache\ArrayCache;
+            : new ArrayCache();
 
-        $config = new \Doctrine\ORM\Configuration();
+        $config = new Configuration();
 
         $config->setMetadataCacheImpl($metadataCache);
-        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver(array(), true));
+        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver([], true));
         $config->setQueryCacheImpl(self::getSharedQueryCacheImpl());
         $config->setProxyDir(__DIR__ . '/Proxies');
         $config->setProxyNamespace('DarkWebDesign\DoctrineUnitTesting\Proxies');
+        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver(
+            [
+            realpath(__DIR__ . '/Models/Cache')
+            ], true));
+
+        if ($this->isSecondLevelCacheEnabled) {
+
+            $cacheConfig    = new CacheConfiguration();
+            $cache          = $this->getSharedSecondLevelCacheDriverImpl();
+            $factory        = new DefaultCacheFactory($cacheConfig->getRegionsConfiguration(), $cache);
+
+            $this->secondLevelCacheFactory = $factory;
+
+            $cacheConfig->setCacheFactory($factory);
+            $config->setSecondLevelCacheEnabled(true);
+            $config->setSecondLevelCacheConfiguration($cacheConfig);
+        }
 
         if ($conn === null) {
-            $conn = array(
-                'driverClass'  => 'DarkWebDesign\DoctrineUnitTesting\Mocks\DriverMock',
-                'wrapperClass' => 'DarkWebDesign\DoctrineUnitTesting\Mocks\ConnectionMock',
+            $conn = [
+                'driverClass'  => Mocks\DriverMock::class,
+                'wrapperClass' => Mocks\ConnectionMock::class,
                 'user'         => 'john',
                 'password'     => 'wayne'
-            );
+            ];
         }
 
         if (is_array($conn)) {
-            $conn = \Doctrine\DBAL\DriverManager::getConnection($conn, $config, $eventManager);
+            $conn = DriverManager::getConnection($conn, $config, $eventManager);
         }
 
-        return \DarkWebDesign\DoctrineUnitTesting\Mocks\EntityManagerMock::create($conn, $config, $eventManager);
+        return Mocks\EntityManagerMock::create($conn, $config, $eventManager);
+    }
+
+    protected function enableSecondLevelCache($log = true)
+    {
+        $this->isSecondLevelCacheEnabled    = true;
+        $this->isSecondLevelCacheLogEnabled = $log;
     }
 
     /**
@@ -118,7 +175,7 @@ abstract class OrmTestCase extends DoctrineTestCase
     private static function getSharedMetadataCacheImpl()
     {
         if (self::$_metadataCacheImpl === null) {
-            self::$_metadataCacheImpl = new \Doctrine\Common\Cache\ArrayCache;
+            self::$_metadataCacheImpl = new ArrayCache();
         }
 
         return self::$_metadataCacheImpl;
@@ -130,9 +187,21 @@ abstract class OrmTestCase extends DoctrineTestCase
     private static function getSharedQueryCacheImpl()
     {
         if (self::$_queryCacheImpl === null) {
-            self::$_queryCacheImpl = new \Doctrine\Common\Cache\ArrayCache;
+            self::$_queryCacheImpl = new ArrayCache();
         }
 
         return self::$_queryCacheImpl;
+    }
+
+    /**
+     * @return \Doctrine\Common\Cache\Cache
+     */
+    protected function getSharedSecondLevelCacheDriverImpl()
+    {
+        if ($this->secondLevelCacheDriverImpl === null) {
+            $this->secondLevelCacheDriverImpl = new ArrayCache();
+        }
+
+        return $this->secondLevelCacheDriverImpl;
     }
 }
