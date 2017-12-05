@@ -8,6 +8,8 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\VersionedManyToOne;
  */
 class Category
 {
+    const CLASSNAME = __CLASS__;
+
     /**
      * @Id
      * @Column(name="id", type="integer")

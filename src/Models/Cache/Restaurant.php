@@ -7,4 +7,5 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Cache;
  */
 class Restaurant extends Attraction
 {
+    const CLASSNAME = __CLASS__;   
 }

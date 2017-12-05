@@ -8,6 +8,8 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Cache;
  */
 class Client
 {
+    const CLASSNAME = __CLASS__;
+
     /**
      * @Id
      * @GeneratedValue

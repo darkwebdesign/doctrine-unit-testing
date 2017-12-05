@@ -2,12 +2,10 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
-use Doctrine\DBAL\Platforms\AbstractPlatform;
-
 /**
  * Mock class for DatabasePlatform.
  */
-class DatabasePlatformMock extends AbstractPlatform
+class DatabasePlatformMock extends \Doctrine\DBAL\Platforms\AbstractPlatform
 {
     /**
      * @var string

@@ -2,6 +2,8 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Models\StockExchange;
 
+use Doctrine\Common\Collections\ArrayCollection;
+
 /**
  * @Entity
  * @Table(name="exchange_stocks")

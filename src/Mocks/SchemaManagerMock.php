@@ -2,18 +2,15 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Schema\AbstractSchemaManager;
-
 /**
  * Mock class for AbstractSchemaManager.
  */
-class SchemaManagerMock extends AbstractSchemaManager
+class SchemaManagerMock extends \Doctrine\DBAL\Schema\AbstractSchemaManager
 {
     /**
      * @param \Doctrine\DBAL\Connection $conn
      */
-    public function __construct(Connection $conn)
+    public function __construct(\Doctrine\DBAL\Connection $conn)
     {
         parent::__construct($conn);
     }

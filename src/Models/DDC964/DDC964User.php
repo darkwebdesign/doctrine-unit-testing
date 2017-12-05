@@ -51,7 +51,7 @@ class DDC964User
     }
 
     /**
-     * @return int
+     * @return integer
      */
     public function getId()
     {
@@ -107,60 +107,48 @@ class DDC964User
         $this->address = $address;
     }
 
-    public static function loadMetadata(\Doctrine\ORM\Mapping\ClassMetadataInfo $metadata)
+    public static function loadMetadata($metadata)
     {
-        $metadata->mapField(
-            [
+        $metadata->mapField(array(
            'id'         => true,
            'fieldName'  => 'id',
            'type'       => 'integer',
            'columnName' => 'user_id',
            'length'     => 150,
-            ]
-        );
-        $metadata->mapField(
-            [
+        ));
+        $metadata->mapField(array(
             'fieldName' => 'name',
             'type'      => 'string',
             'columnName'=> 'user_name',
             'nullable'  => true,
             'unique'    => false,
             'length'    => 250,
-            ]
-        );
+        ));
 
-        $metadata->mapManyToOne(
-            [
+        $metadata->mapManyToOne(array(
            'fieldName'      => 'address',
            'targetEntity'   => 'DDC964Address',
-           'cascade'        => ['persist','merge'],
-           'joinColumn'     => ['name'=>'address_id', 'referencedColumnMame'=>'id'],
-            ]
-        );
+           'cascade'        => array('persist','merge'),
+           'joinColumn'     => array('name'=>'address_id', 'referencedColumnMame'=>'id'),
+        ));
 
-        $metadata->mapManyToMany(
-            [
+        $metadata->mapManyToMany(array(
            'fieldName'      => 'groups',
            'targetEntity'   => 'DDC964Group',
            'inversedBy'     => 'users',
-           'cascade'        => ['persist','merge','detach'],
-           'joinTable'      => [
+           'cascade'        => array('persist','merge','detach'),
+           'joinTable'      => array(
                 'name'          => 'ddc964_users_groups',
-                'joinColumns'   => [
-                    [
+                'joinColumns'   => array(array(
                     'name'=>'user_id',
                     'referencedColumnName'=>'id',
-                    ]
-                ],
-                'inverseJoinColumns'=> [
-                    [
+                )),
+                'inverseJoinColumns'=>array(array(
                     'name'=>'group_id',
                     'referencedColumnName'=>'id',
-                    ]
-                ]
-           ]
-            ]
-        );
+                ))
+           )
+        ));
 
         $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadataInfo::GENERATOR_TYPE_AUTO);
     }

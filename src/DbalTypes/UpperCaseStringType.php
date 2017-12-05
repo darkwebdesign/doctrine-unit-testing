@@ -7,14 +7,12 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 class UpperCaseStringType extends StringType
 {
-    const NAME = 'upper_case_string';
-
     /**
      * {@inheritdoc}
      */
     public function getName()
     {
-        return self::NAME;
+        return 'upper_case_string';
     }
 
     /**

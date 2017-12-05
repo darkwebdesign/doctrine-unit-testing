@@ -9,6 +9,8 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 class DDC2504OtherClass
 {
+    const CLASSNAME = __CLASS__;
+
     /**
      * @Column(type="integer")
      * @Id @GeneratedValue

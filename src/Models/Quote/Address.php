@@ -5,9 +5,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Quote;
 /**
  * @Entity
  * @Table(name="`quote-address`")
- * @InheritanceType("SINGLE_TABLE")
- * @DiscriminatorColumn(name="type", type="string")
- * @DiscriminatorMap({"simple" = Address::class, "full" = FullAddress::class})
  */
 class Address
 {

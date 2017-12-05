@@ -9,6 +9,8 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Cache;
  */
 class Country
 {
+    const CLASSNAME = __CLASS__;
+
     /**
      * @Id
      * @GeneratedValue

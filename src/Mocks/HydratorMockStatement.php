@@ -2,15 +2,13 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
-use Doctrine\DBAL\Driver\Statement;
-
 /**
  * This class is a mock of the Statement interface that can be passed in to the Hydrator
  * to test the hydration standalone with faked result sets.
  *
  * @author  Roman Borschel <roman@code-factory.org>
  */
-class HydratorMockStatement implements \IteratorAggregate, Statement
+class HydratorMockStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\Statement
 {
     /**
      * @var array
@@ -30,12 +28,13 @@ class HydratorMockStatement implements \IteratorAggregate, Statement
     /**
      * Fetches all rows from the result set.
      *
-     * @param int|null   $fetchMode
-     * @param int|null   $fetchArgument
+     * @param int|null   $fetchStyle
+     * @param int|null   $columnIndex
      * @param array|null $ctorArgs
+     *
      * @return array
      */
-    public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null)
+    public function fetchAll($fetchStyle = null, $columnIndex = null, array $ctorArgs = null)
     {
         return $this->_resultSet;
     }
@@ -54,7 +53,7 @@ class HydratorMockStatement implements \IteratorAggregate, Statement
     /**
      * {@inheritdoc}
      */
-    public function fetch($fetchStyle = null, $cursorOrientation = \PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
+    public function fetch($fetchStyle = null)
     {
         $current = current($this->_resultSet);
         next($this->_resultSet);
@@ -107,7 +106,7 @@ class HydratorMockStatement implements \IteratorAggregate, Statement
     /**
      * {@inheritdoc}
      */
-    public function execute($params = null)
+    public function execute($params = array())
     {
     }
 

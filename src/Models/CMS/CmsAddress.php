@@ -124,115 +124,91 @@ class CmsAddress
 
     public static function loadMetadata(\Doctrine\ORM\Mapping\ClassMetadataInfo $metadata)
     {
-        $metadata->setPrimaryTable(
-            [
+        $metadata->setPrimaryTable(array(
            'name' => 'company_person',
-            ]
-        );
+        ));
 
-        $metadata->mapField(
-            [
+        $metadata->mapField(array (
             'id'        => true,
             'fieldName' => 'id',
             'type'      => 'integer',
-            ]
-        );
+        ));
 
-        $metadata->mapField(
-            [
+        $metadata->mapField(array (
             'fieldName' => 'zip',
             'length'    => 50,
-            ]
-        );
+        ));
 
-        $metadata->mapField(
-            [
+        $metadata->mapField(array (
             'fieldName' => 'city',
             'length'    => 50,
-            ]
-        );
+        ));
 
-        $metadata->mapOneToOne(
-            [
+        $metadata->mapOneToOne(array(
             'fieldName'     => 'user',
             'targetEntity'  => 'CmsUser',
-            'joinColumns'   => [['referencedColumnName' => 'id']]
-            ]
-        );
+            'joinColumns'   => array(array('referencedColumnName' => 'id'))
+        ));
 
-        $metadata->addNamedNativeQuery(
-            [
+        $metadata->addNamedNativeQuery(array (
             'name'              => 'find-all',
             'query'             => 'SELECT id, country, city FROM cms_addresses',
             'resultSetMapping'  => 'mapping-find-all',
-            ]
-        );
+        ));
 
-        $metadata->addNamedNativeQuery(
-            [
+        $metadata->addNamedNativeQuery(array (
             'name'              => 'find-by-id',
             'query'             => 'SELECT * FROM cms_addresses WHERE id = ?',
-            'resultClass'       => CmsAddress::class,
-            ]
-        );
+            'resultClass'       => 'Doctrine\\Tests\\Models\\CMS\\CmsAddress',
+        ));
 
-        $metadata->addNamedNativeQuery(
-            [
+        $metadata->addNamedNativeQuery(array (
             'name'              => 'count',
             'query'             => 'SELECT COUNT(*) AS count FROM cms_addresses',
             'resultSetMapping'  => 'mapping-count',
-            ]
-        );
+        ));
 
-        $metadata->addSqlResultSetMapping(
-            [
+        $metadata->addSqlResultSetMapping(array (
             'name'      => 'mapping-find-all',
-            'columns'   => [],
-            'entities'  => [
-                [
-                'fields' => [
-                  [
+            'columns'   => array(),
+            'entities'  => array ( array (
+                'fields' => array (
+                  array (
                     'name'      => 'id',
                     'column'    => 'id',
-                  ],
-                  [
+                  ),
+                  array (
                     'name'      => 'city',
                     'column'    => 'city',
-                  ],
-                  [
+                  ),
+                  array (
                     'name'      => 'country',
                     'column'    => 'country',
-                  ],
-                ],
-                'entityClass' => CmsAddress::class,
-                ],
-            ],
-            ]
-        );
+                  ),
+                ),
+                'entityClass' => 'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsAddress',
+              ),
+            ),
+        ));
 
-        $metadata->addSqlResultSetMapping(
-            [
+        $metadata->addSqlResultSetMapping(array (
             'name'      => 'mapping-without-fields',
-            'columns'   => [],
-            'entities'  => [
-                [
-                'entityClass' => CmsAddress::class,
-                'fields' => []
-                ]
-            ]
-            ]
-        );
+            'columns'   => array(),
+            'entities'  => array(array (
+                'entityClass' => 'Doctrine\\Tests\\Models\\CMS\\CmsAddress',
+                'fields' => array()
+              )
+            )
+        ));
 
-        $metadata->addSqlResultSetMapping(
-            [
+        $metadata->addSqlResultSetMapping(array (
             'name' => 'mapping-count',
-            'columns' => [
-                [
+            'columns' =>array (
+                array (
                     'name' => 'count',
-                ],
-            ]
-            ]
-        );
+                ),
+            )
+        ));
 
         $metadata->addEntityListener(\Doctrine\ORM\Events::postPersist, 'CmsAddressListener', 'postPersist');
         $metadata->addEntityListener(\Doctrine\ORM\Events::prePersist, 'CmsAddressListener', 'prePersist');

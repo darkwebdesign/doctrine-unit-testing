@@ -28,7 +28,7 @@ class Admin1
      * @OneToMany(targetEntity="Admin1AlternateName", mappedBy="admin1")
      * @Cache
      */
-    public $names = [];
+    public $names = array();
 
     /**
      * @Column(type="string", length=255);

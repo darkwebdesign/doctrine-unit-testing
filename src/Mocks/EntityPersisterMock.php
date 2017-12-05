@@ -3,28 +3,26 @@
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Persisters\Entity\BasicEntityPersister;
 
 /**
  * EntityPersister implementation used for mocking during tests.
  */
-class EntityPersisterMock extends BasicEntityPersister
+class EntityPersisterMock extends \Doctrine\ORM\Persisters\Entity\BasicEntityPersister
 {
     /**
      * @var array
      */
-    private $inserts = [];
+    private $inserts = array();
 
     /**
      * @var array
      */
-    private $updates = [];
+    private $updates = array();
 
     /**
      * @var array
      */
-    private $deletes = [];
+    private $deletes = array();
 
     /**
      * @var int
@@ -39,7 +37,7 @@ class EntityPersisterMock extends BasicEntityPersister
     /**
      * @var array
      */
-    private $postInsertIds = [];
+    private $postInsertIds = array();
 
     /**
      * @var bool
@@ -54,13 +52,13 @@ class EntityPersisterMock extends BasicEntityPersister
     public function addInsert($entity)
     {
         $this->inserts[] = $entity;
-        if ( ! is_null($this->mockIdGeneratorType) && $this->mockIdGeneratorType == ClassMetadata::GENERATOR_TYPE_IDENTITY
+        if ( ! is_null($this->mockIdGeneratorType) && $this->mockIdGeneratorType == \Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_IDENTITY
                 || $this->class->isIdGeneratorIdentity()) {
             $id = $this->identityColumnValueCounter++;
-            $this->postInsertIds[] = [
+            $this->postInsertIds[] = array(
                 'generatedId' => $id,
                 'entity' => $entity,
-            ];
+            );
             return $id;
         }
         return null;
@@ -139,9 +137,9 @@ class EntityPersisterMock extends BasicEntityPersister
     {
         $this->existsCalled = false;
         $this->identityColumnValueCounter = 0;
-        $this->inserts = [];
-        $this->updates = [];
-        $this->deletes = [];
+        $this->inserts = array();
+        $this->updates = array();
+        $this->deletes = array();
     }
 
     /**

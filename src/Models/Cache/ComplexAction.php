@@ -10,6 +10,8 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 class ComplexAction
 {
+    const CLASSNAME = __CLASS__;
+
     /**
      * @Column
      */
@@ -18,14 +20,14 @@ class ComplexAction
     /**
      * @Id
      * @OneToOne(targetEntity="Action", cascade={"persist", "remove"})
-     * @JoinColumn(name="action1_name", referencedColumnName="name")
+     * @JoinColumn(name="action1_id", referencedColumnName="id")
      */
     public $action1;
 
     /**
      * @Id
      * @OneToOne(targetEntity="Action", cascade={"persist", "remove"})
-     * @JoinColumn(name="action2_name", referencedColumnName="name")
+     * @JoinColumn(name="action2_id", referencedColumnName="id")
      */
     public $action2;
 
