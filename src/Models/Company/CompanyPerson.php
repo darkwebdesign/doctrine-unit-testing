@@ -120,50 +120,41 @@ class CompanyPerson
     public static function loadMetadata(\Doctrine\ORM\Mapping\ClassMetadataInfo $metadata)
     {
 
-        $metadata->setPrimaryTable(
-            [
+        $metadata->setPrimaryTable(array(
            'name' => 'company_person',
-            ]
-        );
+        ));
 
-        $metadata->addNamedNativeQuery(
-            [
+        $metadata->addNamedNativeQuery(array (
             'name'              => 'fetchAllWithResultClass',
             'query'             => 'SELECT id, name, discr FROM company_persons ORDER BY name',
-            'resultClass'       => CompanyPerson::class,
-            ]
-        );
+            'resultClass'       => 'Doctrine\\Tests\\Models\\Company\\CompanyPerson',
+        ));
 
-        $metadata->addNamedNativeQuery(
-            [
+        $metadata->addNamedNativeQuery(array (
             'name'              => 'fetchAllWithSqlResultSetMapping',
             'query'             => 'SELECT id, name, discr AS discriminator FROM company_persons ORDER BY name',
             'resultSetMapping'  => 'mappingFetchAll',
-            ]
-        );
+        ));
 
-        $metadata->addSqlResultSetMapping(
-            [
+        $metadata->addSqlResultSetMapping(array (
             'name'      => 'mappingFetchAll',
-            'columns'   => [],
-            'entities'  => [
-                [
-                'fields' => [
-                  [
+            'columns'   => array(),
+            'entities'  => array ( array (
+                'fields' => array (
+                  array (
                     'name'      => 'id',
                     'column'    => 'id',
-                  ],
-                  [
+                  ),
+                  array (
                     'name'      => 'name',
                     'column'    => 'name',
-                  ],
-                ],
-                'entityClass' => CompanyPerson::class,
+                  ),
+                ),
+                'entityClass' => 'DarkWebDesign\DoctrineUnitTesting\Models\Company\CompanyPerson',
                 'discriminatorColumn' => 'discriminator',
-                ],
-            ],
-            ]
-        );
+              ),
+            ),
+        ));
     }
 }
 

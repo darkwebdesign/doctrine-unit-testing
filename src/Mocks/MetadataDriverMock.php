@@ -2,18 +2,15 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
-use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-
 /**
  * Mock class for MappingDriver.
  */
-class MetadataDriverMock implements MappingDriver
+class MetadataDriverMock implements \Doctrine\Common\Persistence\Mapping\Driver\MappingDriver
 {
     /**
      * {@inheritdoc}
      */
-    public function loadMetadataForClass($className, ClassMetadata $metadata)
+    public function loadMetadataForClass($className, \Doctrine\Common\Persistence\Mapping\ClassMetadata $metadata)
     {
     }
 
@@ -30,6 +27,6 @@ class MetadataDriverMock implements MappingDriver
      */
     public function getAllClassNames()
     {
-        return [];
+        return array();
     }
 }

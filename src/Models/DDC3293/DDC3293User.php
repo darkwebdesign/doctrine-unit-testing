@@ -10,7 +10,7 @@ class DDC3293User
     protected $id;
 
     /**
-     * @var \DarkWebDesign\DoctrineUnitTesting\Models\DDC3293\DDC3293Address
+     * @var DarkWebDesign\DoctrineUnitTesting\Models\DDC3293\DDC3293Address
      */
     protected $address;
 }

@@ -2,14 +2,12 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
-use Doctrine\DBAL\Driver\Statement;
-
 /**
  * This class is a mock of the Statement interface.
  *
  * @author Alexander <iam.asm89@gmail.com>
  */
-class StatementMock implements \IteratorAggregate, Statement
+class StatementMock implements \IteratorAggregate, \Doctrine\DBAL\Driver\Statement
 {
     /**
      * {@inheritdoc}
@@ -75,14 +73,14 @@ class StatementMock implements \IteratorAggregate, Statement
     /**
      * {@inheritdoc}
      */
-    public function fetch($fetchMode = null, $cursorOrientation = \PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
+    public function fetch($fetchStyle = null)
     {
     }
 
     /**
      * {@inheritdoc}
      */
-    public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null)
+    public function fetchAll($fetchStyle = null)
     {
     }
 

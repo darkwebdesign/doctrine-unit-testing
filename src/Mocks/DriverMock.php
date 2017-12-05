@@ -2,15 +2,10 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver;
-use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Schema\AbstractSchemaManager;
-
 /**
  * Mock class for Driver.
  */
-class DriverMock implements Driver
+class DriverMock implements \Doctrine\DBAL\Driver
 {
     /**
      * @var \Doctrine\DBAL\Platforms\AbstractPlatform|null
@@ -25,7 +20,7 @@ class DriverMock implements Driver
     /**
      * {@inheritdoc}
      */
-    public function connect(array $params, $username = null, $password = null, array $driverOptions = [])
+    public function connect(array $params, $username = null, $password = null, array $driverOptions = array())
     {
         return new DriverConnectionMock();
     }
@@ -44,7 +39,7 @@ class DriverMock implements Driver
     /**
      * {@inheritdoc}
      */
-    public function getSchemaManager(Connection $conn)
+    public function getSchemaManager(\Doctrine\DBAL\Connection $conn)
     {
         if ($this->_schemaManagerMock == null) {
             return new SchemaManagerMock($conn);
@@ -60,7 +55,7 @@ class DriverMock implements Driver
      *
      * @return void
      */
-    public function setDatabasePlatform(AbstractPlatform $platform)
+    public function setDatabasePlatform(\Doctrine\DBAL\Platforms\AbstractPlatform $platform)
     {
         $this->_platformMock = $platform;
     }
@@ -70,7 +65,7 @@ class DriverMock implements Driver
      *
      * @return void
      */
-    public function setSchemaManager(AbstractSchemaManager $sm)
+    public function setSchemaManager(\Doctrine\DBAL\Schema\AbstractSchemaManager $sm)
     {
         $this->_schemaManagerMock = $sm;
     }
@@ -86,7 +81,7 @@ class DriverMock implements Driver
     /**
      * {@inheritdoc}
      */
-    public function getDatabase(Connection $conn)
+    public function getDatabase(\Doctrine\DBAL\Connection $conn)
     {
         return;
     }

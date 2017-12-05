@@ -10,6 +10,8 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\DDC2825;
  */
 class SchemaAndTableInTableName
 {
+    const CLASSNAME = __CLASS__;
+
     /** @Id @Column(type="integer") @GeneratedValue(strategy="AUTO") */
     public $id;
 }

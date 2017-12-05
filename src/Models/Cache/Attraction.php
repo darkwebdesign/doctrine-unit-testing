@@ -5,7 +5,7 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Cache;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * @Cache("NONSTRICT_READ_WRITE")
+ * @Cache
  * @Entity
  * @Table("cache_attraction")
  * @InheritanceType("SINGLE_TABLE")
@@ -17,6 +17,8 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 abstract class Attraction
 {
+    const CLASSNAME = __CLASS__;
+
     /**
      * @Id
      * @GeneratedValue

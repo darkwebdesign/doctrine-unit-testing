@@ -7,4 +7,5 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\DDC2504;
  */
 class DDC2504ChildClass extends DDC2504RootClass
 {
+    const CLASSNAME = __CLASS__;
 }

@@ -8,6 +8,8 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Tweet;
  */
 class Tweet
 {
+    const CLASSNAME = __CLASS__;
+
     /**
      * @Id
      * @GeneratedValue

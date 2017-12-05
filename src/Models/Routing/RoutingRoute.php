@@ -30,7 +30,7 @@ class RoutingRoute
      * @OneToMany(targetEntity="RoutingRouteBooking", mappedBy="route")
      * @OrderBy({"passengerName" = "ASC"})
      */
-    public $bookings = [];
+    public $bookings = array();
 
     public function __construct()
     {

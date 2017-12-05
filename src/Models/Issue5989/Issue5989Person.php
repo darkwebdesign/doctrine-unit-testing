@@ -15,6 +15,8 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Issue5989;
  */
 class Issue5989Person
 {
+    const CLASSNAME = __CLASS__;
+
     /**
      * @Id
      * @Column(type="integer")

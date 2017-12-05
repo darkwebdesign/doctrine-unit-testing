@@ -3,12 +3,11 @@
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Id\SequenceGenerator;
 
 /**
  * Mock class for SequenceGenerator.
  */
-class SequenceMock extends SequenceGenerator
+class SequenceMock extends \Doctrine\ORM\Id\SequenceGenerator
 {
     /**
      * @var int

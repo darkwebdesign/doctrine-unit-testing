@@ -23,7 +23,7 @@ abstract class DDC1590Entity
     /**
      * Get id
      *
-     * @return int
+     * @return integer
      */
     public function getId()
     {

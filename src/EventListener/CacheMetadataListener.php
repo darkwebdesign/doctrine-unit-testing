@@ -17,7 +17,7 @@ class CacheMetadataListener
      *
      * @var array
      */
-    protected $enabledItems = [];
+    protected $enabledItems = array();
 
     /**
      * @param \Doctrine\Common\Persistence\Event\LoadClassMetadataEventArgs $event
@@ -40,7 +40,7 @@ class CacheMetadataListener
      *
      * @return bool
      */
-    private function isVisited(ClassMetadata $metadata)
+    private function isVisited(ClassMetaData $metadata)
     {
         return isset($this->enabledItems[$metadata->getName()]);
     }
@@ -48,7 +48,7 @@ class CacheMetadataListener
     /**
      * @param ClassMetadata $metadata
      */
-    private function recordVisit(ClassMetadata $metadata)
+    private function recordVisit(ClassMetaData $metadata)
     {
         $this->enabledItems[$metadata->getName()] = true;
     }
@@ -63,9 +63,9 @@ class CacheMetadataListener
             return; // Already handled in the past
         }
 
-        $cache = [
+        $cache = array(
             'usage' => ClassMetadata::CACHE_USAGE_NONSTRICT_READ_WRITE
-        ];
+        );
 
         if ($metadata->isVersioned) {
             return;

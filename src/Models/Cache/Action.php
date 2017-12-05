@@ -10,10 +10,17 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 class Action
 {
+    const CLASSNAME = __CLASS__;
+
     /**
      * @Id
-     * @Column(type="string")
-     * @GeneratedValue(strategy="NONE")
+     * @GeneratedValue
+     * @Column(type="integer")
+     */
+    public $id;
+
+    /**
+     * @Column
      */
     public $name;
 

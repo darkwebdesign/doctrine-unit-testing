@@ -2,6 +2,8 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Models\DDC964;
 
+use Doctrine\Common\Collections\ArrayCollection;
+
 /**
  * @Entity
  * @AssociationOverrides({
@@ -21,33 +23,25 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\DDC964;
  */
 class DDC964Admin extends DDC964User
 {
-    public static function loadMetadata(\Doctrine\ORM\Mapping\ClassMetadataInfo $metadata)
+    public static function loadMetadata($metadata)
     {
-        $metadata->setAssociationOverride('address',
-            [
-            'joinColumns'=> [
-                [
+        $metadata->setAssociationOverride('address',array(
+            'joinColumns'=>array(array(
                 'name' => 'adminaddress_id',
                 'referencedColumnName' => 'id',
-                ]
-            ]
-            ]
-        );
+            ))
+        ));
 
-        $metadata->setAssociationOverride('groups',
-            [
-            'joinTable' => [
+        $metadata->setAssociationOverride('groups',array(
+            'joinTable' => array(
                 'name'      => 'ddc964_users_admingroups',
-                'joinColumns' => [
-                    [
+                'joinColumns' => array(array(
                     'name' => 'adminuser_id',
-                    ]
-                ],
-                'inverseJoinColumns' => [[
+                )),
+                'inverseJoinColumns' =>array (array (
                     'name'      => 'admingroup_id',
-                ]]
-            ]
-            ]
-        );
+                ))
+            )
+        ));
     }
 }

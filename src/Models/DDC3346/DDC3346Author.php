@@ -8,6 +8,8 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\DDC3346;
  */
 class DDC3346Author
 {
+    const CLASSNAME = __CLASS__;
+
     /**
      * @Id @Column(type="integer")
      * @GeneratedValue
@@ -22,5 +24,5 @@ class DDC3346Author
     /**
      * @OneToMany(targetEntity="DDC3346Article", mappedBy="user", fetch="EAGER", cascade={"detach"})
      */
-    public $articles = [];
+    public $articles = array();
 }

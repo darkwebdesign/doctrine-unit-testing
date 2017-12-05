@@ -4,11 +4,13 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\DDC3597;
 
 /**
  * Description of Media
- *
+ * 
  * @author Volker von Hoesslin <volker.von.hoesslin@empora.com>
  * @Entity
  */
 abstract class DDC3597Media extends DDC3597Root {
+
+    const CLASSNAME = __CLASS__;
 
     /**
      * @var string

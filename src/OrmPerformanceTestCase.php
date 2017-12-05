@@ -10,7 +10,7 @@ namespace DarkWebDesign\DoctrineUnitTesting;
 class OrmPerformanceTestCase extends OrmFunctionalTestCase
 {
     /**
-     * @var int
+     * @var integer
      */
     protected $maxRunningTime = 0;
 
@@ -54,7 +54,7 @@ class OrmPerformanceTestCase extends OrmFunctionalTestCase
     }
 
     /**
-     * @return int
+     * @return integer
      *
      * @since Method available since Release 2.3.0
      */

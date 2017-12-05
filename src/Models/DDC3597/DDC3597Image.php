@@ -12,6 +12,8 @@ use DarkWebDesign\DoctrineUnitTesting\Models\DDC3597\Embeddable\DDC3597Dimension
  */
 class DDC3597Image extends DDC3597Media {
 
+    const CLASSNAME = __CLASS__;
+
     /**
      * @var DDC3597Dimension
      * @Embedded(class = "DarkWebDesign\DoctrineUnitTesting\Models\DDC3597\Embeddable\DDC3597Dimension", columnPrefix = false)
