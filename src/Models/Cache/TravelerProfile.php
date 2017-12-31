@@ -9,8 +9,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Cache;
  */
 class TravelerProfile
 {
-    const CLASSNAME = __CLASS__;
-
     /**
      * @Id
      * @GeneratedValue

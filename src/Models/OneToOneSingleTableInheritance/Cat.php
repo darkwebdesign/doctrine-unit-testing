@@ -5,8 +5,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\OneToOneSingleTableInheritanc
 /** @Entity */
 class Cat extends Pet
 {
-    const CLASSNAME = __CLASS__;
-
     /**
      * @OneToOne(targetEntity="LitterBox")
      *

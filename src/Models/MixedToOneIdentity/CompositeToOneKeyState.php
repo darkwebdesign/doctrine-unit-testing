@@ -5,8 +5,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\MixedToOneIdentity;
 /** @Entity */
 class CompositeToOneKeyState
 {
-    const CLASSNAME = __CLASS__;
-
     /**
      * @Id
      * @Column(type="string")

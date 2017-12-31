@@ -8,8 +8,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Cache;
  */
 class AttractionLocationInfo extends AttractionInfo
 {
-    const CLASSNAME = __CLASS__;
-
     /**
      * @Column(unique=true)
      */

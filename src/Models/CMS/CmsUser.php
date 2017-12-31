@@ -162,6 +162,14 @@ class CmsUser
      *      )
      */
     public $groups;
+    /**
+     * @ManyToMany(targetEntity="CmsTag", inversedBy="users", cascade={"all"})
+     * @JoinTable(name="cms_users_tags",
+     *      joinColumns={@JoinColumn(name="user_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@JoinColumn(name="tag_id", referencedColumnName="id")}
+     *      )
+     */
+    public $tags;
 
     public $nonPersistedProperty;
 
@@ -171,6 +179,7 @@ class CmsUser
         $this->phonenumbers = new ArrayCollection;
         $this->articles = new ArrayCollection;
         $this->groups = new ArrayCollection;
+        $this->tags = new ArrayCollection;
     }
 
     public function getId() {
@@ -217,6 +226,15 @@ class CmsUser
         return $this->groups;
     }
 
+    public function addTag(CmsTag $tag) {
+        $this->tags[] = $tag;
+        $tag->addUser($this);
+    }
+
+    public function getTags() {
+        return $this->tags;
+    }
+
     public function removePhonenumber($index) {
         if (isset($this->phonenumbers[$index])) {
             $ph = $this->phonenumbers[$index];
@@ -253,188 +271,214 @@ class CmsUser
 
     public static function loadMetadata(\Doctrine\ORM\Mapping\ClassMetadataInfo $metadata)
     {
-        $metadata->setPrimaryTable(array(
+        $metadata->setPrimaryTable(
+            [
            'name' => 'cms_users',
-        ));
+            ]
+        );
 
-        $metadata->addNamedNativeQuery(array (
+        $metadata->addNamedNativeQuery(
+            [
             'name'              => 'fetchIdAndUsernameWithResultClass',
             'query'             => 'SELECT id, username FROM cms_users WHERE username = ?',
-            'resultClass'       => 'Doctrine\\Tests\\Models\\CMS\\CmsUser',
-        ));
+            'resultClass'       => CmsUser::class,
+            ]
+        );
 
-        $metadata->addNamedNativeQuery(array (
+        $metadata->addNamedNativeQuery(
+            [
             'name'              => 'fetchAllColumns',
             'query'             => 'SELECT * FROM cms_users WHERE username = ?',
-            'resultClass'       => 'Doctrine\\Tests\\Models\\CMS\\CmsUser',
-        ));
+            'resultClass'       => CmsUser::class,
+            ]
+        );
 
-        $metadata->addNamedNativeQuery(array (
+        $metadata->addNamedNativeQuery(
+            [
             'name'              => 'fetchJoinedAddress',
             'query'             => 'SELECT u.id, u.name, u.status, a.id AS a_id, a.country, a.zip, a.city FROM cms_users u INNER JOIN cms_addresses a ON u.id = a.user_id WHERE u.username = ?',
             'resultSetMapping'  => 'mappingJoinedAddress',
-        ));
+            ]
+        );
 
-        $metadata->addNamedNativeQuery(array (
+        $metadata->addNamedNativeQuery(
+            [
             'name'              => 'fetchJoinedPhonenumber',
             'query'             => 'SELECT id, name, status, phonenumber AS number FROM cms_users INNER JOIN cms_phonenumbers ON id = user_id WHERE username = ?',
             'resultSetMapping'  => 'mappingJoinedPhonenumber',
-        ));
+            ]
+        );
 
-        $metadata->addNamedNativeQuery(array (
+        $metadata->addNamedNativeQuery(
+            [
             'name'              => 'fetchUserPhonenumberCount',
             'query'             => 'SELECT id, name, status, COUNT(phonenumber) AS numphones FROM cms_users INNER JOIN cms_phonenumbers ON id = user_id WHERE username IN (?) GROUP BY id, name, status, username ORDER BY username',
             'resultSetMapping'  => 'mappingUserPhonenumberCount',
-        ));
+            ]
+        );
 
-        $metadata->addNamedNativeQuery(array (
+        $metadata->addNamedNativeQuery(
+            [
             "name"              => "fetchMultipleJoinsEntityResults",
             "resultSetMapping"  => "mappingMultipleJoinsEntityResults",
             "query"             => "SELECT u.id AS u_id, u.name AS u_name, u.status AS u_status, a.id AS a_id, a.zip AS a_zip, a.country AS a_country, COUNT(p.phonenumber) AS numphones FROM cms_users u INNER JOIN cms_addresses a ON u.id = a.user_id INNER JOIN cms_phonenumbers p ON u.id = p.user_id GROUP BY u.id, u.name, u.status, u.username, a.id, a.zip, a.country ORDER BY u.username"
-        ));
+            ]
+        );
 
-        $metadata->addSqlResultSetMapping(array (
+        $metadata->addSqlResultSetMapping(
+            [
             'name'      => 'mappingJoinedAddress',
-            'columns'   => array(),
-            'entities'  => array(array (
-                'fields'=> array (
-                  array (
+            'columns'   => [],
+            'entities'  => [
+                [
+                'fields'=> [
+                  [
                     'name'      => 'id',
                     'column'    => 'id',
-                  ),
-                  array (
+                  ],
+                  [
                     'name'      => 'name',
                     'column'    => 'name',
-                  ),
-                  array (
+                  ],
+                  [
                     'name'      => 'status',
                     'column'    => 'status',
-                  ),
-                  array (
+                  ],
+                  [
                     'name'      => 'address.zip',
                     'column'    => 'zip',
-                  ),
-                  array (
+                  ],
+                  [
                     'name'      => 'address.city',
                     'column'    => 'city',
-                  ),
-                  array (
+                  ],
+                  [
                     'name'      => 'address.country',
                     'column'    => 'country',
-                  ),
-                  array (
+                  ],
+                  [
                     'name'      => 'address.id',
                     'column'    => 'a_id',
-                  ),
-                ),
-                'entityClass'           => 'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsUser',
+                  ],
+                ],
+                'entityClass'           => CmsUser::class,
                 'discriminatorColumn'   => null
-              ),
-            ),
-        ));
+                ],
+            ],
+            ]
+        );
 
-        $metadata->addSqlResultSetMapping(array (
+        $metadata->addSqlResultSetMapping(
+            [
             'name'      => 'mappingJoinedPhonenumber',
-            'columns'   => array(),
-            'entities'  => array(array(
-                'fields'=> array (
-                  array (
+            'columns'   => [],
+            'entities'  => [
+                [
+                'fields'=> [
+                  [
                     'name'      => 'id',
                     'column'    => 'id',
-                  ),
-                  array (
+                  ],
+                  [
                     'name'      => 'name',
                     'column'    => 'name',
-                  ),
-                  array (
+                  ],
+                  [
                     'name'      => 'status',
                     'column'    => 'status',
-                  ),
-                  array (
+                  ],
+                  [
                     'name'      => 'phonenumbers.phonenumber',
                     'column'    => 'number',
-                  ),
-                ),
-                'entityClass'   => 'Doctrine\\Tests\\Models\\CMS\\CmsUser',
+                  ],
+                ],
+                'entityClass'   => CmsUser::class,
                 'discriminatorColumn'   => null
-              ),
-            ),
-        ));
+                ],
+            ],
+            ]
+        );
 
-        $metadata->addSqlResultSetMapping(array (
+        $metadata->addSqlResultSetMapping(
+            [
             'name'      => 'mappingUserPhonenumberCount',
-            'columns'   => array(),
-            'entities'  => array (
-              array(
-                'fields' => array (
-                  array (
+            'columns'   => [],
+            'entities'  => [
+              [
+                'fields' => [
+                  [
                     'name'      => 'id',
                     'column'    => 'id',
-                  ),
-                  array (
+                  ],
+                  [
                     'name'      => 'name',
                     'column'    => 'name',
-                  ),
-                  array (
+                  ],
+                  [
                     'name'      => 'status',
                     'column'    => 'status',
-                  )
-                ),
-                'entityClass'   => 'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsUser',
+                  ]
+                ],
+                'entityClass'   => CmsUser::class,
                 'discriminatorColumn'   => null
-              )
-            ),
-            'columns' => array (
-                  array (
+              ]
+            ],
+            'columns' => [
+                  [
                     'name' => 'numphones',
-                  )
-            )
-        ));
+                  ]
+            ]
+            ]
+        );
 
-        $metadata->addSqlResultSetMapping(array(
+        $metadata->addSqlResultSetMapping(
+            [
             'name'      => 'mappingMultipleJoinsEntityResults',
-            'entities'  => array(array(
-                    'fields' => array(
-                        array(
+            'entities'  => [
+                [
+                    'fields' => [
+                        [
                             'name'      => 'id',
                             'column'    => 'u_id',
-                        ),
-                        array(
+                        ],
+                        [
                             'name'      => 'name',
                             'column'    => 'u_name',
-                        ),
-                        array(
+                        ],
+                        [
                             'name'      => 'status',
                             'column'    => 'u_status',
-                        )
-                    ),
-                    'entityClass'           => 'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsUser',
+                        ]
+                    ],
+                    'entityClass'           => CmsUser::class,
                     'discriminatorColumn'   => null,
-                ),
-                array(
-                    'fields' => array(
-                        array(
+                ],
+                [
+                    'fields' => [
+                        [
                             'name'      => 'id',
                             'column'    => 'a_id',
-                        ),
-                        array(
+                        ],
+                        [
                             'name'      => 'zip',
                             'column'    => 'a_zip',
-                        ),
-                        array(
+                        ],
+                        [
                             'name'      => 'country',
                             'column'    => 'a_country',
-                        ),
-                    ),
-                    'entityClass'           => 'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsAddress',
+                        ],
+                    ],
+                    'entityClass'           => CmsAddress::class,
                     'discriminatorColumn'   => null,
-                ),
-            ),
-            'columns' => array(array(
+                ],
+            ],
+            'columns' => [
+                [
                     'name' => 'numphones',
-                )
-            )
-        ));
+                ]
+            ]
+            ]
+        );
 
     }
 }

@@ -5,8 +5,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\DDC3699;
 /** @Entity @Table(name="ddc3699_child") */
 class DDC3699Child extends DDC3699Parent
 {
-    const CLASSNAME = __CLASS__;
-
     /** @Id @Column(type="integer") */
     public $id;
 

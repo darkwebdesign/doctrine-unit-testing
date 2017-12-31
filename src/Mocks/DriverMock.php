@@ -2,10 +2,15 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Schema\AbstractSchemaManager;
+
 /**
  * Mock class for Driver.
  */
-class DriverMock implements \Doctrine\DBAL\Driver
+class DriverMock implements Driver
 {
     /**
      * @var \Doctrine\DBAL\Platforms\AbstractPlatform|null
@@ -20,7 +25,7 @@ class DriverMock implements \Doctrine\DBAL\Driver
     /**
      * {@inheritdoc}
      */
-    public function connect(array $params, $username = null, $password = null, array $driverOptions = array())
+    public function connect(array $params, $username = null, $password = null, array $driverOptions = [])
     {
         return new DriverConnectionMock();
     }
@@ -39,13 +44,13 @@ class DriverMock implements \Doctrine\DBAL\Driver
     /**
      * {@inheritdoc}
      */
-    public function getSchemaManager(\Doctrine\DBAL\Connection $conn)
+    public function getSchemaManager(Connection $conn)
     {
         if ($this->_schemaManagerMock == null) {
             return new SchemaManagerMock($conn);
-        } else {
-            return $this->_schemaManagerMock;
         }
+
+        return $this->_schemaManagerMock;
     }
 
     /* MOCK API */
@@ -55,7 +60,7 @@ class DriverMock implements \Doctrine\DBAL\Driver
      *
      * @return void
      */
-    public function setDatabasePlatform(\Doctrine\DBAL\Platforms\AbstractPlatform $platform)
+    public function setDatabasePlatform(AbstractPlatform $platform)
     {
         $this->_platformMock = $platform;
     }
@@ -65,7 +70,7 @@ class DriverMock implements \Doctrine\DBAL\Driver
      *
      * @return void
      */
-    public function setSchemaManager(\Doctrine\DBAL\Schema\AbstractSchemaManager $sm)
+    public function setSchemaManager(AbstractSchemaManager $sm)
     {
         $this->_schemaManagerMock = $sm;
     }
@@ -81,7 +86,7 @@ class DriverMock implements \Doctrine\DBAL\Driver
     /**
      * {@inheritdoc}
      */
-    public function getDatabase(\Doctrine\DBAL\Connection $conn)
+    public function getDatabase(Connection $conn)
     {
         return;
     }

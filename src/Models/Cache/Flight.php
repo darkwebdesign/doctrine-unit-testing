@@ -9,8 +9,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Cache;
  */
 class Flight
 {
-    const CLASSNAME = __CLASS__;
-
     /**
      * @Id
      * @Cache

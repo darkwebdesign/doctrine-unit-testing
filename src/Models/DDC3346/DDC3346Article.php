@@ -8,8 +8,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\DDC3346;
  */
 class DDC3346Article
 {
-    const CLASSNAME = __CLASS__;
-
     /**
      * @Id
      * @Column(type="integer")

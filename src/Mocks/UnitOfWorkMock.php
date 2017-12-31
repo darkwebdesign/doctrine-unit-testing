@@ -2,15 +2,17 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
+use Doctrine\ORM\UnitOfWork;
+
 /**
  * Mock class for UnitOfWork.
  */
-class UnitOfWorkMock extends \Doctrine\ORM\UnitOfWork
+class UnitOfWorkMock extends UnitOfWork
 {
     /**
      * @var array
      */
-    private $_mockDataChangeSets = array();
+    private $_mockDataChangeSets = [];
 
     /**
      * @var array|null
@@ -22,18 +24,25 @@ class UnitOfWorkMock extends \Doctrine\ORM\UnitOfWork
      */
     public function getEntityPersister($entityName)
     {
-        return isset($this->_persisterMock[$entityName]) ?
-                $this->_persisterMock[$entityName] : parent::getEntityPersister($entityName);
+        return isset($this->_persisterMock[$entityName])
+            ? $this->_persisterMock[$entityName]
+            : parent::getEntityPersister($entityName);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getEntityChangeSet($entity)
+    public function & getEntityChangeSet($entity)
     {
         $oid = spl_object_hash($entity);
-        return isset($this->_mockDataChangeSets[$oid]) ?
-                $this->_mockDataChangeSets[$oid] : parent::getEntityChangeSet($entity);
+
+        if (isset($this->_mockDataChangeSets[$oid])) {
+            return $this->_mockDataChangeSets[$oid];
+        }
+
+        $data = parent::getEntityChangeSet($entity);
+
+        return $data;
     }
 
     /* MOCK API */

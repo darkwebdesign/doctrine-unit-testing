@@ -8,8 +8,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Tweet;
  */
 class UserList
 {
-    const CLASSNAME = __CLASS__;
-
     /**
      * @Id
      * @GeneratedValue

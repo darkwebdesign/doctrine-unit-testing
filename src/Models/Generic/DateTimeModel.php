@@ -8,8 +8,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Generic;
  */
 class DateTimeModel
 {
-    const CLASSNAME = __CLASS__;
-
     /**
      * @Id @Column(type="integer")
      * @GeneratedValue
