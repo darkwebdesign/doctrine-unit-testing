@@ -4,7 +4,7 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Pagination;
 /**
  * Company
  *
- * @package DarkWebDesign\DoctrineUnitTesting\Models\Pagination
+ * @package Doctrine\Tests\Models\Pagination
  *
  * @author Bill Schaller
  * @Entity

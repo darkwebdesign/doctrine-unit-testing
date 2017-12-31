@@ -8,8 +8,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Cache;
  */
 class Login
 {
-    const CLASSNAME = __CLASS__;
-
     /**
      * @Id
      * @GeneratedValue

@@ -1,7 +1,6 @@
 <?php
-namespace DarkWebDesign\DoctrineUnitTesting\Models\StockExchange;
 
-use Doctrine\Common\Collections\ArrayCollection;
+namespace DarkWebDesign\DoctrineUnitTesting\Models\StockExchange;
 
 /**
  * Bonds have many stocks. This uses a many to many association and fails to model how many of a

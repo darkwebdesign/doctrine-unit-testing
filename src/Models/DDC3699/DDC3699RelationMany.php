@@ -8,8 +8,6 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\DDC3699;
  */
 class DDC3699RelationMany
 {
-    const CLASSNAME = __CLASS__;
-
     /** @Id @Column(type="integer") */
     public $id;
 

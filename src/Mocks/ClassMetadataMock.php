@@ -2,10 +2,12 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting\Mocks;
 
+use Doctrine\ORM\Mapping\ClassMetadata;
+
 /**
  * Mock class for ClassMetadata.
  */
-class ClassMetadataMock extends \Doctrine\ORM\Mapping\ClassMetadata
+class ClassMetadataMock extends ClassMetadata
 {
     /* Mock API */
 

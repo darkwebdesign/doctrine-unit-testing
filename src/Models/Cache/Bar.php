@@ -7,5 +7,4 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Cache;
  */
 class Bar extends Attraction
 {
-    const CLASSNAME = __CLASS__;   
 }

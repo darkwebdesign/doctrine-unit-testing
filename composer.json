@@ -9,8 +9,8 @@
         {"name": "Raymond Schouten"}
     ],
     "require": {
-        "doctrine/orm": "^2.5",
-        "php": ">=5.4"
+        "doctrine/orm": "^2.6",
+        "php": ">=7.1"
     },
     "autoload": {
         "psr-4": {

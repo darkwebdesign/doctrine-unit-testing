@@ -2,10 +2,23 @@
 
 namespace DarkWebDesign\DoctrineUnitTesting;
 
+use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriver;
+use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Driver\PDOSqlite\Driver as SqliteDriver;
+use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\DBAL\Types\Type;
-use DarkWebDesign\DoctrineUnitTesting\EventListener\CacheMetadataListener;
-use Doctrine\ORM\Cache\Logging\StatisticsCacheLogger;
+use Doctrine\ORM\Cache\CacheConfiguration;
 use Doctrine\ORM\Cache\DefaultCacheFactory;
+use Doctrine\ORM\Cache\Logging\StatisticsCacheLogger;
+use Doctrine\ORM\Configuration;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\DebugUnitOfWorkListener;
+use Doctrine\ORM\Tools\SchemaTool;
+use DarkWebDesign\DoctrineUnitTesting\DbalTypes\Rot13Type;
+use DarkWebDesign\DoctrineUnitTesting\EventListener\CacheMetadataListener;
+use DarkWebDesign\DoctrineUnitTesting\Models;
+use PHPUnit\Framework\AssertionFailedError;
 
 /**
  * Base testcase class for all functional ORM testcases.
@@ -55,241 +68,252 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
      *
      * @var array
      */
-    protected $_usedModelSets = array();
+    protected $_usedModelSets = [];
+
+    /**
+     * To be configured by the test that uses result set cache
+     *
+     * @var \Doctrine\Common\Cache\Cache|null
+     */
+    protected $resultCacheImpl;
 
     /**
      * Whether the database schema has already been created.
      *
      * @var array
      */
-    protected static $_tablesCreated = array();
+    protected static $_tablesCreated = [];
 
     /**
      * Array of entity class name to their tables that were created.
      *
      * @var array
      */
-    protected static $_entityTablesCreated = array();
+    protected static $_entityTablesCreated = [];
 
     /**
      * List of model sets and their classes.
      *
      * @var array
      */
-    protected static $_modelSets = array(
-        'cms' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsUser',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsPhonenumber',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsAddress',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsEmail',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsGroup',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsArticle',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CMS\CmsComment',
-        ),
-        'forum' => array(),
-        'company' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\Company\CompanyPerson',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Company\CompanyEmployee',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Company\CompanyManager',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Company\CompanyOrganization',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Company\CompanyEvent',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Company\CompanyAuction',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Company\CompanyRaffle',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Company\CompanyCar',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Company\CompanyContract',
-        ),
-        'ecommerce' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ECommerce\ECommerceCart',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ECommerce\ECommerceCustomer',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ECommerce\ECommerceProduct',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ECommerce\ECommerceShipping',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ECommerce\ECommerceFeature',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ECommerce\ECommerceCategory'
-        ),
-        'generic' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\Generic\BooleanModel',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Generic\DateTimeModel',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Generic\DecimalModel',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Generic\SerializationModel',
-        ),
-        'routing' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\Routing\RoutingLeg',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Routing\RoutingLocation',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Routing\RoutingRoute',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Routing\RoutingRouteBooking',
-        ),
-        'navigation' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\Navigation\NavUser',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Navigation\NavCountry',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Navigation\NavPhotos',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Navigation\NavTour',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Navigation\NavPointOfInterest',
-        ),
-        'directorytree' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\DirectoryTree\AbstractContentItem',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DirectoryTree\File',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DirectoryTree\Directory',
-        ),
-        'ddc117' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC117\DDC117Article',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC117\DDC117Reference',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC117\DDC117Translation',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC117\DDC117ArticleDetails',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC117\DDC117ApproveChanges',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC117\DDC117Editor',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC117\DDC117Link',
-        ),
-        'ddc3699' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC3699\DDC3699Parent',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC3699\DDC3699RelationOne',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC3699\DDC3699RelationMany',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC3699\DDC3699Child',
-        ),
-        'stockexchange' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\StockExchange\Bond',
-            'DarkWebDesign\DoctrineUnitTesting\Models\StockExchange\Stock',
-            'DarkWebDesign\DoctrineUnitTesting\Models\StockExchange\Market',
-        ),
-        'legacy' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\Legacy\LegacyUser',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Legacy\LegacyUserReference',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Legacy\LegacyArticle',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Legacy\LegacyCar',
-        ),
-        'customtype' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\CustomType\CustomTypeChild',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CustomType\CustomTypeParent',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CustomType\CustomTypeUpperCase',
-        ),
-        'compositekeyinheritance' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\CompositeKeyInheritance\JoinedRootClass',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CompositeKeyInheritance\JoinedChildClass',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CompositeKeyInheritance\SingleRootClass',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CompositeKeyInheritance\SingleChildClass',
-        ),
-        'taxi' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\Taxi\PaidRide',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Taxi\Ride',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Taxi\Car',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Taxi\Driver',
-        ),
-        'cache' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Country',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\State',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\City',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Traveler',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\TravelerProfileInfo',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\TravelerProfile',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Travel',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Attraction',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Restaurant',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Beach',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Bar',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Flight',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Token',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Login',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Client',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\Action',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\ComplexAction',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\AttractionInfo',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\AttractionContactInfo',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Cache\AttractionLocationInfo'
-        ),
-        'tweet' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\Tweet\User',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Tweet\Tweet',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Tweet\UserList',
-        ),
-        'ddc2504' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC2504\DDC2504RootClass',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC2504\DDC2504ChildClass',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC2504\DDC2504OtherClass',
-        ),
-        'ddc3346' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC3346\DDC3346Author',
-            'DarkWebDesign\DoctrineUnitTesting\Models\DDC3346\DDC3346Article',
-        ),
-        'quote' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\Quote\Address',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Quote\Group',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Quote\NumericEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Quote\Phone',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Quote\User'
-        ),
-        'vct_onetoone' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\InversedOneToOneEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\OwningOneToOneEntity'
-        ),
-        'vct_onetoone_compositeid' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\InversedOneToOneCompositeIdEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\OwningOneToOneCompositeIdEntity'
-        ),
-        'vct_onetoone_compositeid_foreignkey' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\AuxiliaryEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\InversedOneToOneCompositeIdForeignKeyEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\OwningOneToOneCompositeIdForeignKeyEntity'
-        ),
-        'vct_onetomany' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\InversedOneToManyEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\OwningManyToOneEntity'
-        ),
-        'vct_onetomany_compositeid' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\InversedOneToManyCompositeIdEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\OwningManyToOneCompositeIdEntity'
-        ),
-        'vct_onetomany_compositeid_foreignkey' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\AuxiliaryEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\InversedOneToManyCompositeIdForeignKeyEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\OwningManyToOneCompositeIdForeignKeyEntity'
-        ),
-        'vct_onetomany_extralazy' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\InversedOneToManyExtraLazyEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\OwningManyToOneExtraLazyEntity'
-        ),
-        'vct_manytomany' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\InversedManyToManyEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\OwningManyToManyEntity'
-        ),
-        'vct_manytomany_compositeid' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\InversedManyToManyCompositeIdEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\OwningManyToManyCompositeIdEntity'
-        ),
-        'vct_manytomany_compositeid_foreignkey' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\AuxiliaryEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\InversedManyToManyCompositeIdForeignKeyEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\OwningManyToManyCompositeIdForeignKeyEntity'
-        ),
-        'vct_manytomany_extralazy' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\InversedManyToManyExtraLazyEntity',
-            'DarkWebDesign\DoctrineUnitTesting\Models\ValueConversionType\OwningManyToManyExtraLazyEntity'
-        ),
-        'geonames' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\GeoNames\Country',
-            'DarkWebDesign\DoctrineUnitTesting\Models\GeoNames\Admin1',
-            'DarkWebDesign\DoctrineUnitTesting\Models\GeoNames\Admin1AlternateName',
-            'DarkWebDesign\DoctrineUnitTesting\Models\GeoNames\City'
-        ),
-        'custom_id_object_type' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\CustomType\CustomIdObjectTypeParent',
-            'DarkWebDesign\DoctrineUnitTesting\Models\CustomType\CustomIdObjectTypeChild',
-        ),
-        'pagination' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\Pagination\Company',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Pagination\Logo',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Pagination\Department',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Pagination\User',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Pagination\User1',
-        ),
-        'versioned_many_to_one' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\VersionedManyToOne\Category',
-            'DarkWebDesign\DoctrineUnitTesting\Models\VersionedManyToOne\Article',
-        ),
-        'issue5989' => array(
-            'DarkWebDesign\DoctrineUnitTesting\Models\Issue5989\Issue5989Person',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Issue5989\Issue5989Employee',
-            'DarkWebDesign\DoctrineUnitTesting\Models\Issue5989\Issue5989Manager',
-        ),
-    );
+    protected static $_modelSets = [
+        'cms' => [
+            Models\CMS\CmsUser::class,
+            Models\CMS\CmsPhonenumber::class,
+            Models\CMS\CmsAddress::class,
+            Models\CMS\CmsEmail::class,
+            Models\CMS\CmsGroup::class,
+            Models\CMS\CmsTag::class,
+            Models\CMS\CmsArticle::class,
+            Models\CMS\CmsComment::class,
+        ],
+        'company' => [
+            Models\Company\CompanyPerson::class,
+            Models\Company\CompanyEmployee::class,
+            Models\Company\CompanyManager::class,
+            Models\Company\CompanyOrganization::class,
+            Models\Company\CompanyEvent::class,
+            Models\Company\CompanyAuction::class,
+            Models\Company\CompanyRaffle::class,
+            Models\Company\CompanyCar::class,
+            Models\Company\CompanyContract::class,
+        ],
+        'ecommerce' => [
+            Models\ECommerce\ECommerceCart::class,
+            Models\ECommerce\ECommerceCustomer::class,
+            Models\ECommerce\ECommerceProduct::class,
+            Models\ECommerce\ECommerceShipping::class,
+            Models\ECommerce\ECommerceFeature::class,
+            Models\ECommerce\ECommerceCategory::class
+        ],
+        'generic' => [
+            Models\Generic\BooleanModel::class,
+            Models\Generic\DateTimeModel::class,
+            Models\Generic\DecimalModel::class,
+            Models\Generic\SerializationModel::class,
+        ],
+        'routing' => [
+            Models\Routing\RoutingLeg::class,
+            Models\Routing\RoutingLocation::class,
+            Models\Routing\RoutingRoute::class,
+            Models\Routing\RoutingRouteBooking::class,
+        ],
+        'navigation' => [
+            Models\Navigation\NavUser::class,
+            Models\Navigation\NavCountry::class,
+            Models\Navigation\NavPhotos::class,
+            Models\Navigation\NavTour::class,
+            Models\Navigation\NavPointOfInterest::class,
+        ],
+        'directorytree' => [
+            Models\DirectoryTree\AbstractContentItem::class,
+            Models\DirectoryTree\File::class,
+            Models\DirectoryTree\Directory::class,
+        ],
+        'ddc117' => [
+            Models\DDC117\DDC117Article::class,
+            Models\DDC117\DDC117Reference::class,
+            Models\DDC117\DDC117Translation::class,
+            Models\DDC117\DDC117ArticleDetails::class,
+            Models\DDC117\DDC117ApproveChanges::class,
+            Models\DDC117\DDC117Editor::class,
+            Models\DDC117\DDC117Link::class,
+        ],
+        'ddc3699' => [
+            Models\DDC3699\DDC3699Parent::class,
+            Models\DDC3699\DDC3699RelationOne::class,
+            Models\DDC3699\DDC3699RelationMany::class,
+            Models\DDC3699\DDC3699Child::class,
+        ],
+        'stockexchange' => [
+            Models\StockExchange\Bond::class,
+            Models\StockExchange\Stock::class,
+            Models\StockExchange\Market::class,
+        ],
+        'legacy' => [
+            Models\Legacy\LegacyUser::class,
+            Models\Legacy\LegacyUserReference::class,
+            Models\Legacy\LegacyArticle::class,
+            Models\Legacy\LegacyCar::class,
+        ],
+        'customtype' => [
+            Models\CustomType\CustomTypeChild::class,
+            Models\CustomType\CustomTypeParent::class,
+            Models\CustomType\CustomTypeUpperCase::class,
+        ],
+        'compositekeyinheritance' => [
+            Models\CompositeKeyInheritance\JoinedRootClass::class,
+            Models\CompositeKeyInheritance\JoinedChildClass::class,
+            Models\CompositeKeyInheritance\SingleRootClass::class,
+            Models\CompositeKeyInheritance\SingleChildClass::class,
+        ],
+        'taxi' => [
+            Models\Taxi\PaidRide::class,
+            Models\Taxi\Ride::class,
+            Models\Taxi\Car::class,
+            Models\Taxi\Driver::class,
+        ],
+        'cache' => [
+            Models\Cache\Country::class,
+            Models\Cache\State::class,
+            Models\Cache\City::class,
+            Models\Cache\Traveler::class,
+            Models\Cache\TravelerProfileInfo::class,
+            Models\Cache\TravelerProfile::class,
+            Models\Cache\Travel::class,
+            Models\Cache\Attraction::class,
+            Models\Cache\Restaurant::class,
+            Models\Cache\Beach::class,
+            Models\Cache\Bar::class,
+            Models\Cache\Flight::class,
+            Models\Cache\Token::class,
+            Models\Cache\Login::class,
+            Models\Cache\Client::class,
+            Models\Cache\Person::class,
+            Models\Cache\Address::class,
+            Models\Cache\Action::class,
+            Models\Cache\ComplexAction::class,
+            Models\Cache\AttractionInfo::class,
+            Models\Cache\AttractionContactInfo::class,
+            Models\Cache\AttractionLocationInfo::class
+        ],
+        'tweet' => [
+            Models\Tweet\User::class,
+            Models\Tweet\Tweet::class,
+            Models\Tweet\UserList::class,
+        ],
+        'ddc2504' => [
+            Models\DDC2504\DDC2504RootClass::class,
+            Models\DDC2504\DDC2504ChildClass::class,
+            Models\DDC2504\DDC2504OtherClass::class,
+        ],
+        'ddc3346' => [
+            Models\DDC3346\DDC3346Author::class,
+            Models\DDC3346\DDC3346Article::class,
+        ],
+        'quote' => [
+            Models\Quote\Address::class,
+            Models\Quote\City::class,
+            Models\Quote\FullAddress::class,
+            Models\Quote\Group::class,
+            Models\Quote\NumericEntity::class,
+            Models\Quote\Phone::class,
+            Models\Quote\User::class
+        ],
+        'vct_onetoone' => [
+            Models\ValueConversionType\InversedOneToOneEntity::class,
+            Models\ValueConversionType\OwningOneToOneEntity::class
+        ],
+        'vct_onetoone_compositeid' => [
+            Models\ValueConversionType\InversedOneToOneCompositeIdEntity::class,
+            Models\ValueConversionType\OwningOneToOneCompositeIdEntity::class
+        ],
+        'vct_onetoone_compositeid_foreignkey' => [
+            Models\ValueConversionType\AuxiliaryEntity::class,
+            Models\ValueConversionType\InversedOneToOneCompositeIdForeignKeyEntity::class,
+            Models\ValueConversionType\OwningOneToOneCompositeIdForeignKeyEntity::class
+        ],
+        'vct_onetomany' => [
+            Models\ValueConversionType\InversedOneToManyEntity::class,
+            Models\ValueConversionType\OwningManyToOneEntity::class
+        ],
+        'vct_onetomany_compositeid' => [
+            Models\ValueConversionType\InversedOneToManyCompositeIdEntity::class,
+            Models\ValueConversionType\OwningManyToOneCompositeIdEntity::class
+        ],
+        'vct_onetomany_compositeid_foreignkey' => [
+            Models\ValueConversionType\AuxiliaryEntity::class,
+            Models\ValueConversionType\InversedOneToManyCompositeIdForeignKeyEntity::class,
+            Models\ValueConversionType\OwningManyToOneCompositeIdForeignKeyEntity::class
+        ],
+        'vct_onetomany_extralazy' => [
+            Models\ValueConversionType\InversedOneToManyExtraLazyEntity::class,
+            Models\ValueConversionType\OwningManyToOneExtraLazyEntity::class
+        ],
+        'vct_manytomany' => [
+            Models\ValueConversionType\InversedManyToManyEntity::class,
+            Models\ValueConversionType\OwningManyToManyEntity::class
+        ],
+        'vct_manytomany_compositeid' => [
+            Models\ValueConversionType\InversedManyToManyCompositeIdEntity::class,
+            Models\ValueConversionType\OwningManyToManyCompositeIdEntity::class
+        ],
+        'vct_manytomany_compositeid_foreignkey' => [
+            Models\ValueConversionType\AuxiliaryEntity::class,
+            Models\ValueConversionType\InversedManyToManyCompositeIdForeignKeyEntity::class,
+            Models\ValueConversionType\OwningManyToManyCompositeIdForeignKeyEntity::class
+        ],
+        'vct_manytomany_extralazy' => [
+            Models\ValueConversionType\InversedManyToManyExtraLazyEntity::class,
+            Models\ValueConversionType\OwningManyToManyExtraLazyEntity::class
+        ],
+        'geonames' => [
+            Models\GeoNames\Country::class,
+            Models\GeoNames\Admin1::class,
+            Models\GeoNames\Admin1AlternateName::class,
+            Models\GeoNames\City::class
+        ],
+        'custom_id_object_type' => [
+            Models\CustomType\CustomIdObjectTypeParent::class,
+            Models\CustomType\CustomIdObjectTypeChild::class,
+        ],
+        'pagination' => [
+            Models\Pagination\Company::class,
+            Models\Pagination\Logo::class,
+            Models\Pagination\Department::class,
+            Models\Pagination\User::class,
+            Models\Pagination\User1::class,
+        ],
+        'versioned_many_to_one' => [
+            Models\VersionedManyToOne\Category::class,
+            Models\VersionedManyToOne\Article::class,
+        ],
+        'issue5989' => [
+            Models\Issue5989\Issue5989Person::class,
+            Models\Issue5989\Issue5989Employee::class,
+            Models\Issue5989\Issue5989Manager::class,
+        ],
+    ];
 
     /**
      * @param string $setName
@@ -308,7 +332,7 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
      */
     protected function tearDown()
     {
-        $conn     = static::$_sharedConn;
+        $conn = static::$_sharedConn;
 
         // In case test is skipped, tearDown is called, but no setup may have run
         if ( ! $conn) {
@@ -322,6 +346,8 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
         if (isset($this->_usedModelSets['cms'])) {
             $conn->executeUpdate('DELETE FROM cms_users_groups');
             $conn->executeUpdate('DELETE FROM cms_groups');
+            $conn->executeUpdate('DELETE FROM cms_users_tags');
+            $conn->executeUpdate('DELETE FROM cms_tags');
             $conn->executeUpdate('DELETE FROM cms_addresses');
             $conn->executeUpdate('DELETE FROM cms_phonenumbers');
             $conn->executeUpdate('DELETE FROM cms_comments');
@@ -452,8 +478,8 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
             $conn->executeUpdate('DELETE FROM cache_state');
             $conn->executeUpdate('DELETE FROM cache_country');
             $conn->executeUpdate('DELETE FROM cache_login');
-            $conn->executeUpdate('DELETE FROM cache_complex_action');
             $conn->executeUpdate('DELETE FROM cache_token');
+            $conn->executeUpdate('DELETE FROM cache_complex_action');
             $conn->executeUpdate('DELETE FROM cache_action');
             $conn->executeUpdate('DELETE FROM cache_client');
         }
@@ -463,11 +489,26 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
             $conn->executeUpdate('DELETE FROM ddc3346_users');
         }
 
+        if (isset($this->_usedModelSets['ornemental_orphan_removal'])) {
+            $conn->executeUpdate('DELETE FROM ornemental_orphan_removal_person');
+            $conn->executeUpdate('DELETE FROM ornemental_orphan_removal_phone_number');
+        }
+
         if (isset($this->_usedModelSets['quote'])) {
-            $conn->executeUpdate('DELETE FROM ' . $platform->quoteIdentifier("quote-address"));
-            $conn->executeUpdate('DELETE FROM ' . $platform->quoteIdentifier("quote-group"));
-            $conn->executeUpdate('DELETE FROM ' . $platform->quoteIdentifier("quote-phone"));
-            $conn->executeUpdate('DELETE FROM ' . $platform->quoteIdentifier("quote-user"));
+            $conn->executeUpdate(
+                sprintf(
+                    'UPDATE %s SET %s = NULL',
+                    $platform->quoteIdentifier("quote-address"),
+                    $platform->quoteIdentifier('user-id')
+                )
+            );
+
+            $conn->executeUpdate('DELETE FROM ' . $platform->quoteIdentifier('quote-users-groups'));
+            $conn->executeUpdate('DELETE FROM ' . $platform->quoteIdentifier('quote-group'));
+            $conn->executeUpdate('DELETE FROM ' . $platform->quoteIdentifier('quote-phone'));
+            $conn->executeUpdate('DELETE FROM ' . $platform->quoteIdentifier('quote-user'));
+            $conn->executeUpdate('DELETE FROM ' . $platform->quoteIdentifier('quote-address'));
+            $conn->executeUpdate('DELETE FROM ' . $platform->quoteIdentifier('quote-city'));
         }
 
         if (isset($this->_usedModelSets['vct_onetoone'])) {
@@ -577,7 +618,7 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
             throw new \RuntimeException("EntityManager not set, you have to call parent::setUp() before invoking this method.");
         }
 
-        $classes = array();
+        $classes = [];
         foreach ($classNames as $className) {
             if ( ! isset(static::$_entityTablesCreated[$className])) {
                 static::$_entityTablesCreated[$className] = true;
@@ -600,18 +641,12 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
     {
         $this->setUpDBALTypes();
 
-        $forceCreateTables = false;
-
         if ( ! isset(static::$_sharedConn)) {
             static::$_sharedConn = TestUtil::getConnection();
-
-            if (static::$_sharedConn->getDriver() instanceof \Doctrine\DBAL\Driver\PDOSqlite\Driver) {
-                $forceCreateTables = true;
-            }
         }
 
         if (isset($GLOBALS['DOCTRINE_MARK_SQL_LOGS'])) {
-            if (in_array(static::$_sharedConn->getDatabasePlatform()->getName(), array("mysql", "postgresql"))) {
+            if (in_array(static::$_sharedConn->getDatabasePlatform()->getName(), ["mysql", "postgresql"])) {
                 static::$_sharedConn->executeQuery('SELECT 1 /*' . get_class($this) . '*/');
             } else if (static::$_sharedConn->getDatabasePlatform()->getName() == "oracle") {
                 static::$_sharedConn->executeQuery('SELECT 1 /*' . get_class($this) . '*/ FROM dual');
@@ -620,13 +655,13 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
 
         if ( ! $this->_em) {
             $this->_em = $this->_getEntityManager();
-            $this->_schemaTool = new \Doctrine\ORM\Tools\SchemaTool($this->_em);
+            $this->_schemaTool = new SchemaTool($this->_em);
         }
 
-        $classes = array();
+        $classes = [];
 
         foreach ($this->_usedModelSets as $setName => $bool) {
-            if ( ! isset(static::$_tablesCreated[$setName])/* || $forceCreateTables*/) {
+            if ( ! isset(static::$_tablesCreated[$setName])) {
                 foreach (static::$_modelSets[$setName] as $className) {
                     $classes[] = $this->_em->getClassMetadata($className);
                 }
@@ -645,12 +680,14 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
     /**
      * Gets an EntityManager for testing purposes.
      *
-     * @param \Doctrine\ORM\Configuration   $config       The Configuration to pass to the EntityManager.
-     * @param \Doctrine\Common\EventManager $eventManager The EventManager to pass to the EntityManager.
+     * @return EntityManager
      *
-     * @return \Doctrine\ORM\EntityManager
+     * @throws \Doctrine\ORM\ORMException
      */
-    protected function _getEntityManager($config = null, $eventManager = null) {
+    protected function _getEntityManager(
+        Connection $connection = null,
+        MappingDriver $mappingDriver = null
+    ) {
         // NOTE: Functional tests use their own shared metadata cache, because
         // the actual database platform used during execution has effect on some
         // metadata mapping behaviors (like the choice of the ID generation).
@@ -658,30 +695,34 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
             if (isset($GLOBALS['DOCTRINE_CACHE_IMPL'])) {
                 self::$_metadataCacheImpl = new $GLOBALS['DOCTRINE_CACHE_IMPL'];
             } else {
-                self::$_metadataCacheImpl = new \Doctrine\Common\Cache\ArrayCache;
+                self::$_metadataCacheImpl = new ArrayCache();
             }
         }
 
         if (is_null(self::$_queryCacheImpl)) {
-            self::$_queryCacheImpl = new \Doctrine\Common\Cache\ArrayCache;
+            self::$_queryCacheImpl = new ArrayCache();
         }
 
-        $this->_sqlLoggerStack = new \Doctrine\DBAL\Logging\DebugStack();
+        $this->_sqlLoggerStack = new DebugStack();
         $this->_sqlLoggerStack->enabled = false;
 
         //FIXME: two different configs! $conn and the created entity manager have
         // different configs.
-        $config = new \Doctrine\ORM\Configuration();
+        $config = new Configuration();
         $config->setMetadataCacheImpl(self::$_metadataCacheImpl);
         $config->setQueryCacheImpl(self::$_queryCacheImpl);
         $config->setProxyDir(__DIR__ . '/Proxies');
-        $config->setProxyNamespace('DarkWebDesign\DoctrineUnitTesting\Proxies');
+        $config->setProxyNamespace('Doctrine\Tests\Proxies');
+
+        if (null !== $this->resultCacheImpl) {
+            $config->setResultCacheImpl($this->resultCacheImpl);
+        }
 
         $enableSecondLevelCache = getenv('ENABLE_SECOND_LEVEL_CACHE');
 
         if ($this->isSecondLevelCacheEnabled || $enableSecondLevelCache) {
 
-            $cacheConfig    = new \Doctrine\ORM\Cache\CacheConfiguration();
+            $cacheConfig    = new CacheConfiguration();
             $cache          = $this->getSharedSecondLevelCacheDriverImpl();
             $factory        = new DefaultCacheFactory($cacheConfig->getRegionsConfiguration(), $cache);
 
@@ -699,19 +740,24 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
             $this->isSecondLevelCacheEnabled = true;
         }
 
-        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver(array(
-            realpath(__DIR__ . '/Models/Cache'),
-            realpath(__DIR__ . '/Models/GeoNames')
-        ), true));
+        $config->setMetadataDriverImpl(
+            $mappingDriver ?? $config->newDefaultAnnotationDriver(
+                [
+                    realpath(__DIR__ . '/Models/Cache'),
+                    realpath(__DIR__ . '/Models/GeoNames')
+                ],
+                true
+            )
+        );
 
-        $conn = static::$_sharedConn;
+        $conn = $connection ?: static::$_sharedConn;
         $conn->getConfiguration()->setSQLLogger($this->_sqlLoggerStack);
 
         // get rid of more global state
         $evm = $conn->getEventManager();
         foreach ($evm->getListeners() AS $event => $listeners) {
             foreach ($listeners AS $listener) {
-                $evm->removeEventListener(array($event), $listener);
+                $evm->removeEventListener([$event], $listener);
             }
         }
 
@@ -727,31 +773,32 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
         }
 
         if (isset($GLOBALS['debug_uow_listener'])) {
-            $evm->addEventListener(array('onFlush'), new \Doctrine\ORM\Tools\DebugUnitOfWorkListener());
+            $evm->addEventListener(['onFlush'], new DebugUnitOfWorkListener());
         }
 
-        return \Doctrine\ORM\EntityManager::create($conn, $config);
+        return EntityManager::create($conn, $config);
     }
 
     /**
-     * @param \Exception $e
+     * @param \Throwable $e
      *
      * @return void
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
-    protected function onNotSuccessfulTest(\Exception $e)
+    protected function onNotSuccessfulTest(\Throwable $e)
     {
-        if ($e instanceof \PHPUnit_Framework_AssertionFailedError) {
+        if ($e instanceof AssertionFailedError) {
             throw $e;
         }
 
         if(isset($this->_sqlLoggerStack->queries) && count($this->_sqlLoggerStack->queries)) {
             $queries = "";
-            for($i = count($this->_sqlLoggerStack->queries)-1; $i > max(count($this->_sqlLoggerStack->queries)-25, 0) && isset($this->_sqlLoggerStack->queries[$i]); $i--) {
-                $query = $this->_sqlLoggerStack->queries[$i];
-                $params = array_map(function($p) { if (is_object($p)) return get_class($p); else return "'".$p."'"; }, $query['params'] ?: array());
-                $queries .= ($i+1).". SQL: '".$query['sql']."' Params: ".implode(", ", $params).PHP_EOL;
+            $last25queries = array_slice(array_reverse($this->_sqlLoggerStack->queries, true), 0, 25, true);
+            foreach ($last25queries as $i => $query) {
+                $params = array_map(function($p) { if (is_object($p)) return get_class($p); else return var_export($p, true); }, $query['params'] ?: []
+                );
+                $queries .= $i.". SQL: '".$query['sql']."' Params: ".implode(", ", $params).PHP_EOL;
             }
 
             $trace = $e->getTrace();
@@ -795,9 +842,9 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
     protected function setUpDBALTypes()
     {
         if (Type::hasType('rot13')) {
-            Type::overrideType('rot13', 'DarkWebDesign\DoctrineUnitTesting\DbalTypes\Rot13Type');
+            Type::overrideType('rot13', Rot13Type::class);
         } else {
-            Type::addType('rot13', 'DarkWebDesign\DoctrineUnitTesting\DbalTypes\Rot13Type');
+            Type::addType('rot13', Rot13Type::class);
         }
     }
 }
