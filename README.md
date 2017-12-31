@@ -5,8 +5,8 @@
 [![License](https://poser.pugx.org/darkwebdesign/doctrine-unit-testing/license?format=flat)](https://packagist.org/packages/darkwebdesign/doctrine-unit-testing)
 
 [![Build Status](https://travis-ci.org/darkwebdesign/doctrine-unit-testing.svg?branch=2.5)](https://travis-ci.org/darkwebdesign/doctrine-unit-testing?branch=2.5)
-[![Minimum PHP Version](https://img.shields.io/badge/php-5.4%2B-777BB3.svg)](https://php.net/)
-[![Minimum Doctrine Version](https://img.shields.io/badge/doctrine-2.5-2E6BC8.svg)](http://www.doctrine-project.org/)
+[![PHP Version](https://img.shields.io/badge/php-5.4%2B-777BB3.svg)](https://php.net/)
+[![Doctrine Version](https://img.shields.io/badge/doctrine-2.5-2E6BC8.svg)](http://www.doctrine-project.org/)
 
 Doctrine Unit Testing makes the Doctrine internal test case classes available to use in your own projects
 unit tests.
