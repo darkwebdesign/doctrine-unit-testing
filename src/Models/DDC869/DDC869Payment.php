@@ -3,7 +3,7 @@
 namespace DarkWebDesign\DoctrineUnitTesting\Models\DDC869;
 
 /**
- * @MappedSuperclass(repositoryClass = "Doctrine\Tests\Models\DDC869\DDC869PaymentRepository")
+ * @MappedSuperclass(repositoryClass = "DarkWebDesign\DoctrineUnitTesting\Models\DDC869\DDC869PaymentRepository")
  */
 class DDC869Payment
 {

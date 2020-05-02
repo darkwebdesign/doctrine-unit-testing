@@ -4,7 +4,7 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Pagination;
 
 /**
  * Class User1
- * @package Doctrine\Tests\Models\Pagination
+ * @package DarkWebDesign\DoctrineUnitTesting\Models\Pagination
  *
  * @Entity()
  */

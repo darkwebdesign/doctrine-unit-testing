@@ -341,7 +341,9 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
 
         $platform = $conn->getDatabasePlatform();
 
-        $this->_sqlLoggerStack->enabled = false;
+        if ($this->_sqlLoggerStack instanceof DebugStack) {
+            $this->_sqlLoggerStack->enabled = false;
+        }
 
         if (isset($this->_usedModelSets['cms'])) {
             $conn->executeUpdate('DELETE FROM cms_users_groups');
@@ -712,7 +714,7 @@ abstract class OrmFunctionalTestCase extends OrmTestCase
         $config->setMetadataCacheImpl(self::$_metadataCacheImpl);
         $config->setQueryCacheImpl(self::$_queryCacheImpl);
         $config->setProxyDir(__DIR__ . '/Proxies');
-        $config->setProxyNamespace('Doctrine\Tests\Proxies');
+        $config->setProxyNamespace('DarkWebDesign\DoctrineUnitTesting\Proxies');
 
         if (null !== $this->resultCacheImpl) {
             $config->setResultCacheImpl($this->resultCacheImpl);

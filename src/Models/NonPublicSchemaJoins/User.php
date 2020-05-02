@@ -3,7 +3,7 @@
 namespace DarkWebDesign\DoctrineUnitTesting\Models\NonPublicSchemaJoins;
 
 /**
- * Doctrine\Tests\Models\NonPublicSchemaJoins\User
+ * DarkWebDesign\DoctrineUnitTesting\Models\NonPublicSchemaJoins\User
  *
  * @Entity
  * @Table(name="readers.user")
@@ -17,7 +17,7 @@ class User
     public $id;
 
     /**
-     * @ManyToMany(targetEntity="Doctrine\Tests\Models\NonPublicSchemaJoins\User", inversedBy="authors")
+     * @ManyToMany(targetEntity="DarkWebDesign\DoctrineUnitTesting\Models\NonPublicSchemaJoins\User", inversedBy="authors")
      * @JoinTable(
      *      name="author_reader",
      *      schema="readers",
@@ -30,7 +30,7 @@ class User
     public $readers;
 
     /**
-     * @ManyToMany(targetEntity="Doctrine\Tests\Models\NonPublicSchemaJoins\User", mappedBy="readers")
+     * @ManyToMany(targetEntity="DarkWebDesign\DoctrineUnitTesting\Models\NonPublicSchemaJoins\User", mappedBy="readers")
      *
      * @var User[]
      */
