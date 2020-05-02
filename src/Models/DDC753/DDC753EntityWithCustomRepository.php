@@ -3,7 +3,7 @@
 namespace DarkWebDesign\DoctrineUnitTesting\Models\DDC753;
 
 /**
- * @Entity(repositoryClass = "Doctrine\Tests\Models\DDC753\DDC753CustomRepository")
+ * @Entity(repositoryClass = "DarkWebDesign\DoctrineUnitTesting\Models\DDC753\DDC753CustomRepository")
  */
 class DDC753EntityWithCustomRepository
 {

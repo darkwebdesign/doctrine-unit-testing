@@ -14,7 +14,7 @@ class DDC3597Image extends DDC3597Media {
 
     /**
      * @var DDC3597Dimension
-     * @Embedded(class = "Doctrine\Tests\Models\DDC3597\Embeddable\DDC3597Dimension", columnPrefix = false)
+     * @Embedded(class = "DarkWebDesign\DoctrineUnitTesting\Models\DDC3597\Embeddable\DDC3597Dimension", columnPrefix = false)
      */
     private $dimension;
 

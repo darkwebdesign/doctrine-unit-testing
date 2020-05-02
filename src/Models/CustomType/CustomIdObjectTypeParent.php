@@ -19,7 +19,7 @@ class CustomIdObjectTypeParent
     public $id;
 
     /**
-     * @OneToMany(targetEntity="Doctrine\Tests\Models\CustomType\CustomIdObjectTypeChild", cascade={"persist", "remove"}, mappedBy="parent")
+     * @OneToMany(targetEntity="DarkWebDesign\DoctrineUnitTesting\Models\CustomType\CustomIdObjectTypeChild", cascade={"persist", "remove"}, mappedBy="parent")
      */
     public $children;
 

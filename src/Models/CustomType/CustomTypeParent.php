@@ -20,17 +20,17 @@ class CustomTypeParent
     public $customInteger;
 
     /**
-     * @OneToOne(targetEntity="Doctrine\Tests\Models\CustomType\CustomTypeChild", cascade={"persist", "remove"})
+     * @OneToOne(targetEntity="DarkWebDesign\DoctrineUnitTesting\Models\CustomType\CustomTypeChild", cascade={"persist", "remove"})
      */
     public $child;
 
     /**
-     * @ManyToMany(targetEntity="Doctrine\Tests\Models\CustomType\CustomTypeParent", mappedBy="myFriends")
+     * @ManyToMany(targetEntity="DarkWebDesign\DoctrineUnitTesting\Models\CustomType\CustomTypeParent", mappedBy="myFriends")
      */
     private $friendsWithMe;
 
     /**
-     * @ManyToMany(targetEntity="Doctrine\Tests\Models\CustomType\CustomTypeParent", inversedBy="friendsWithMe")
+     * @ManyToMany(targetEntity="DarkWebDesign\DoctrineUnitTesting\Models\CustomType\CustomTypeParent", inversedBy="friendsWithMe")
      * @JoinTable(
      *     name="customtype_parent_friends",
      *     joinColumns={@JoinColumn(name="customtypeparent_id", referencedColumnName="id")},

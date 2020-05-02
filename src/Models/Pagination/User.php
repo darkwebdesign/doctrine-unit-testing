@@ -4,7 +4,7 @@ namespace DarkWebDesign\DoctrineUnitTesting\Models\Pagination;
 
 
 /**
- * @package Doctrine\Tests\Models\Pagination
+ * @package DarkWebDesign\DoctrineUnitTesting\Models\Pagination
  *
  * @Entity
  * @Table(name="pagination_user")

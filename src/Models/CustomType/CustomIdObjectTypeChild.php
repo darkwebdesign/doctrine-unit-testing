@@ -18,7 +18,7 @@ class CustomIdObjectTypeChild
     public $id;
 
     /**
-     * @ManyToOne(targetEntity="Doctrine\Tests\Models\CustomType\CustomIdObjectTypeParent", inversedBy="children")
+     * @ManyToOne(targetEntity="DarkWebDesign\DoctrineUnitTesting\Models\CustomType\CustomIdObjectTypeParent", inversedBy="children")
      */
     public $parent;
 
